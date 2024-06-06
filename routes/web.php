@@ -9,6 +9,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\AssignedEvaluationController;
 use App\Http\Controllers\CollaboratorAnswerController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
 
 
 // General routes
@@ -55,17 +56,15 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::post('/groups/{group}/add-collaborator', [TeamGroupController::class, 'storeCollaborator'])->name('groups.store-collaborator');
 });
 
-
 // Rutas para evaluaciones asignadas
 Route::middleware(['auth'])->group(function () {
     Route::get('/assigned_evaluations', [AssignedEvaluationController::class, 'index'])->name('assigned_evaluations.index');
     Route::get('/assigned_evaluations/create', [AssignedEvaluationController::class, 'create'])->name('assigned_evaluations.create');
     Route::post('/assigned_evaluations', [AssignedEvaluationController::class, 'store'])->name('assigned_evaluations.store');
     Route::get('/assigned_evaluations/{assignedEvaluation}', [AssignedEvaluationController::class, 'show'])->name('assigned_evaluations.show');
-    Route::get('/all_assigned_evaluations', [AssignedEvaluationController::class, 'overview'])->name('assigned_evaluations.overview');
+    Route::get('/assigned_evaluations/{assignedEvaluation}/edit', [AssignedEvaluationController::class, 'edit'])->name('assigned_evaluations.edit');
+    Route::put('/assigned_evaluations/{assignedEvaluation}', [AssignedEvaluationController::class, 'update'])->name('assigned_evaluations.update');
     Route::delete('/assigned_evaluations/{assignedEvaluation}', [AssignedEvaluationController::class, 'destroy'])->name('assigned_evaluations.destroy');
-    
-    // Rutas para respuestas de colaboradores
-    Route::get('/assigned_evaluations/{assignedEvaluation}/questions/{question}/answers/create', [CollaboratorAnswerController::class, 'create'])->name('collaborator_answers.create');
-    Route::post('/assigned_evaluations/{assignedEvaluation}/questions/{question}/answers', [CollaboratorAnswerController::class, 'store'])->name('collaborator_answers.store');
+    Route::get('/assigned_evaluations/group', [AssignedEvaluationController::class, 'showGroupEvaluations'])->name('assigned_evaluations.group');
+    Route::get('/assigned_evaluations/group/{evaluationID}/{groupID}', [AssignedEvaluationController::class, 'showGroupEvaluationDetails'])->name('assigned_evaluations.group.details');
 });

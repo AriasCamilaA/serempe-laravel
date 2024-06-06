@@ -10,10 +10,10 @@ class AnswersTableSeeder extends Seeder
     public function run()
     {
         DB::table('answers')->insert([
-            ['QuestionID' => 1, 'Text' => 'A place to store data', 'IsCorrect' => true],
-            ['QuestionID' => 1, 'Text' => 'A data type', 'IsCorrect' => false],
-            ['QuestionID' => 2, 'Text' => 'A control structure that repeats a block of code', 'IsCorrect' => true],
-            ['QuestionID' => 2, 'Text' => 'A type of function', 'IsCorrect' => false],
+            ['QuestionID' => 1, 'Text' => 'Good', 'IsCorrect' => true],
+            ['QuestionID' => 1, 'Text' => 'Bad', 'IsCorrect' => false],
+            ['QuestionID' => 2, 'Text' => 'Yes', 'IsCorrect' => true],
+            ['QuestionID' => 2, 'Text' => 'No', 'IsCorrect' => false],
         ]);
     }
 }

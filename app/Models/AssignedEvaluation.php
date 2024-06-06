@@ -11,7 +11,14 @@ class AssignedEvaluation extends Model
 
     protected $primaryKey = 'AssignedEvaluationID';
 
-    protected $fillable = ['EvaluationID', 'CollaboratorID', 'AssignmentDate', 'CompletionDate', 'Score'];
+    protected $fillable = [
+        'EvaluationID',
+        'CollaboratorID',
+        'LeaderID',
+        'AssignmentDate',
+        'CompletionDate',
+        'Score'
+    ];
 
     public function evaluation()
     {
@@ -21,6 +28,11 @@ class AssignedEvaluation extends Model
     public function collaborator()
     {
         return $this->belongsTo(User::class, 'CollaboratorID');
+    }
+
+    public function leader()
+    {
+        return $this->belongsTo(User::class, 'LeaderID');
     }
 
     public function collaboratorAnswers()

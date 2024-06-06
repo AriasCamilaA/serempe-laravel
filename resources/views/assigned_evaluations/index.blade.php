@@ -2,23 +2,30 @@
 
 @section('content')
 <div class="container">
-    <h1>Evaluaciones Asignadas</h1>
-    @foreach ($assignedEvaluations as $assignedEvaluation)
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ $assignedEvaluation->evaluation->Name }}</h5>
-                <p class="card-text">Colaborador: {{ $assignedEvaluation->collaborator->name }}</p>
-                <p class="card-text">Fecha de Asignación: {{ $assignedEvaluation->AssignmentDate }}</p>
-                <p class="card-text">Fecha de Finalización: {{ $assignedEvaluation->CompletionDate ?? 'Pendiente' }}</p>
-                <p class="card-text">Puntuación: {{ $assignedEvaluation->Score }}</p>
-                <a href="{{ route('assigned_evaluations.show', $assignedEvaluation) }}" class="btn btn-primary">Ver Detalles</a>
-                <form action="{{ route('assigned_evaluations.destroy', $assignedEvaluation) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
-        </div>
-    @endforeach
+    <h1 class="text-center my-4">Evaluaciones Asignadas</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Evaluación</th>
+                <th>Fecha de Asignación</th>
+                <th>Fecha de Compleción</th>
+                <th>Puntuación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($assignedEvaluations as $evaluation)
+                <tr>
+                    <td>{{ $evaluation->evaluation->Name }}</td>
+                    <td>{{ $evaluation->AssignmentDate }}</td>
+                    <td>{{ $evaluation->CompletionDate ? $evaluation->CompletionDate : 'Pendiente' }}</td>
+                    <td>{{ $evaluation->Score }}</td>
+                    <td>
+                        <a href="{{ route('assigned_evaluations.show', $evaluation->AssignedEvaluationID) }}" class="btn btn-primary">Ver Detalles</a>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 @endsection

@@ -2,10 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="d-flex align-items-center">
-        <h1>Resumen de Evaluaciones Asignadas</h1>
-        <a href="{{ route('assigned_evaluations.create') }}" class="btn btn-primary ms-3">Asignar Nueva Evaluación</a>
-    </div>
+    <h1>Resumen de Evaluaciones Asignadas</h1>
 
     @foreach ($evaluations as $evaluation)
         <div class="card mb-3">

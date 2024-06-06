@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AssignedEvaluation;
+use App\Models\TeamGroup;
 
 class HomeController extends Controller
 {
@@ -27,13 +29,18 @@ class HomeController extends Controller
         $user = Auth::user();
 
         if ($user->role->Name == 'Admin') {
-            $message = 'Hola Admin';
+            $data = 'Hola Admin';
         } elseif ($user->Type == 'Leader') {
-            $message = 'Hola Empleado Líder';
-        } else {
-            $message = 'Hola Empleado Colaborador';
+            $groups = TeamGroup::whereHas('collaborators', function ($query) {
+                $query->where('id', Auth::id());
+            })->with(['collaborators.assignedEvaluations.evaluation'])->get();
+            $data = $groups;
+        } elseif ($user->Type == 'Collaborator'){
+            $user = Auth::user();
+            $assignedEvaluations = AssignedEvaluation::where('CollaboratorID', $user->id)->get();
+            $data = $assignedEvaluations;
         }
 
-        return view('home', compact('message'));
+        return view('home', compact('data'));
     }
 }

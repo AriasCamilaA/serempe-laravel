@@ -15,6 +15,8 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- Añadir Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMpyMGRA6j/iWofbg1m46i4svoHoB79fsu3onU" crossorigin="anonymous">
 </head>
 <body>
     <div id="app">
@@ -49,6 +51,9 @@
                                 </li>
                             @endif
                         @else
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('home') }}">{{ __('Home') }}</a>
+                            </li>
                             @if (Auth::user()->role->Name == 'Admin')
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('users.index') }}">{{ __('Usuarios') }}</a>
@@ -60,7 +65,7 @@
                                     <a class="nav-link" href="{{ route('groups.index') }}">{{ __('Grupos') }}</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('assigned_evaluations.overview') }}">{{ __('Resumen Asignados') }}</a>
+                                    <a class="nav-link" href="{{ route('assigned_evaluations.index') }}">{{ __('Resumen Asignados') }}</a>
                                 </li>
                             @elseif (Auth::user()->role->Name == 'Employee')
                                 @if (Auth::user()->Type == 'Leader')
@@ -71,14 +76,11 @@
                                         <a class="nav-link" href="{{ route('groups.index') }}">{{ __('Grupos') }}</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('assigned_evaluations.overview') }}">{{ __('Resumen Asignados') }}</a>
+                                        <a class="nav-link" href="{{ route('assigned_evaluations.group') }}">{{ __('Resumen Asignados') }}</a>
                                     </li>
 
                                 @endif
                             @endif
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('assigned_evaluations.index') }}">{{ __('Asignaciones') }}</a>
-                                    </li>
                                     <li class="nav-item dropdown">
                                         <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }}

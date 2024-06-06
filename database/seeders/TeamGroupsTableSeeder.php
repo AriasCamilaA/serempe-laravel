@@ -10,7 +10,7 @@ class TeamGroupsTableSeeder extends Seeder
     public function run()
     {
         DB::table('team_groups')->insert([
-            ['Name' => 'Development Team', 'LeaderID' => 1]
+            ['Name' => 'Development Team', 'LeaderID' => 3]
         ]);
     }
 }

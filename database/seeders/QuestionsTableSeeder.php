@@ -10,8 +10,8 @@ class QuestionsTableSeeder extends Seeder
     public function run()
     {
         DB::table('questions')->insert([
-            ['EvaluationID' => 1, 'Text' => 'What is a variable?'],
-            ['EvaluationID' => 1, 'Text' => 'What is a loop?'],
+            ['EvaluationID' => 1, 'Text' => 'What is his behavior?'],
+            ['EvaluationID' => 1, 'Text' => 'Do I complete the task?'],
         ]);
     }
 }

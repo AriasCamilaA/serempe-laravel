@@ -32,4 +32,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(TeamGroup::class, 'group_collaborators', 'CollaboratorID', 'GroupID');
     }
+
+    public function assignedEvaluations()
+    {
+        return $this->hasMany(AssignedEvaluation::class, 'CollaboratorID');
+    }
 }

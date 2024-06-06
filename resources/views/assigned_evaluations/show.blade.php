@@ -15,16 +15,29 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">{{ $question->Text }}</h5>
-                <ul class="list-group">
-                    @foreach ($question->answers as $answer)
-                        <li class="list-group-item">{{ $answer->Text }} 
-                        @if ($answer->IsCorrect)
-                            <span class="badge badge-success">Correcta</span>
-                        @endif
-                        </li>
-                    @endforeach
-                </ul>
-                <a href="{{ route('collaborator_answers.create', ['assignedEvaluation' => $assignedEvaluation, 'question' => $question]) }}" class="btn btn-primary mt-3">Responder</a>
+                @php
+                    $answered = $assignedEvaluation->collaboratorAnswers->where('QuestionID', $question->QuestionID)->first();
+                @endphp
+                @if ($answered)
+                    <ul class="list-group">
+                        @foreach ($question->answers as $answer)
+                            @php
+                                $isCorrect = $answer->IsCorrect;
+                                $isSelected = $answered && $answered->AnswerID == $answer->AnswerID;
+                            @endphp
+                            <li class="list-group-item {{ $isSelected ? ($isCorrect ? 'list-group-item-success' : 'list-group-item-warning') : '' }}">
+                                {{ $answer->Text }}
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <ul class="list-group">
+                        @foreach ($question->answers as $answer)
+                            <li class="list-group-item">{{ $answer->Text }}</li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ route('collaborator_answers.create', ['assignedEvaluation' => $assignedEvaluation->AssignedEvaluationID, 'question' => $question->QuestionID]) }}" class="btn btn-primary mt-3">Responder</a>
+                @endif
             </div>
         </div>
     @endforeach

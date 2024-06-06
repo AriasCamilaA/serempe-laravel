@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\AssignedEvaluation;
 use App\Models\CollaboratorAnswer;
 use App\Models\Question;
-use App\Models\Answer;
 use Illuminate\Http\Request;
 
 class CollaboratorAnswerController extends Controller
@@ -30,4 +29,3 @@ class CollaboratorAnswerController extends Controller
         return redirect()->route('assigned_evaluations.show', $assignedEvaluation)->with('success', 'Respuesta registrada con éxito.');
     }
 }
-

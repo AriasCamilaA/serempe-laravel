@@ -4,57 +4,123 @@ namespace App\Http\Controllers;
 
 use App\Models\AssignedEvaluation;
 use App\Models\Evaluation;
-use App\Models\User;
+use App\Models\Question;
+use App\Models\TeamGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AssignedEvaluationController extends Controller
 {
-    // Función para mostrar todas las evaluaciones asignadas al usuario actual
     public function index()
     {
         $assignedEvaluations = AssignedEvaluation::where('CollaboratorID', auth()->id())->get();
         return view('assigned_evaluations.index', compact('assignedEvaluations'));
     }
 
-    // Función para mostrar el formulario de creación de una nueva evaluación asignada
-    public function create()
+    public function create(Request $request)
     {
+        $groupID = $request->input('group_id');
         $evaluations = Evaluation::all();
-        $collaborators = User::where('Type', 'Collaborator')->get();
-        return view('assigned_evaluations.create', compact('evaluations', 'collaborators'));
+        $group = TeamGroup::findOrFail($groupID);
+        return view('assigned_evaluations.create', compact('evaluations', 'group'));
     }
 
-    // Función para almacenar una nueva evaluación asignada
     public function store(Request $request)
     {
         $request->validate([
             'evaluation_id' => 'required|exists:evaluations,EvaluationID',
-            'collaborator_id' => 'required|exists:users,id',
+            'group_id' => 'required|exists:team_groups,GroupID',
         ]);
 
-        AssignedEvaluation::create([
-            'EvaluationID' => $request->evaluation_id,
-            'CollaboratorID' => $request->collaborator_id,
-            'AssignmentDate' => now(),
-        ]);
+        $group = TeamGroup::find($request->group_id);
+        $evaluation = Evaluation::find($request->evaluation_id);
 
-        return redirect()->route('assigned_evaluations.index')->with('success', 'Evaluación asignada con éxito.');
+        foreach ($group->collaborators as $collaborator) {
+            AssignedEvaluation::create([
+                'EvaluationID' => $evaluation->EvaluationID,
+                'CollaboratorID' => $collaborator->id,
+                'LeaderID' => Auth::id(),
+                'AssignmentDate' => now(),
+            ]);
+        }
+
+        return redirect()->route('homme')->with('success', 'Evaluación asignada a todos los colaboradores del grupo.');
     }
 
-    // Función para mostrar una evaluación asignada específica
+    public function showGroupEvaluations()
+    {
+        $groups = TeamGroup::where('LeaderID', Auth::id())->with('collaborators.assignedEvaluations.evaluation')->get();
+        return view('assigned_evaluations.group_evaluations', compact('groups'));
+    }
+
+    public function showGroupEvaluationDetails($evaluationID, $groupID)
+    {
+        $group = TeamGroup::findOrFail($groupID);
+        $evaluation = Evaluation::findOrFail($evaluationID);
+        
+        $assignedEvaluations = AssignedEvaluation::where('EvaluationID', $evaluationID)
+            ->whereIn('CollaboratorID', $group->collaborators->pluck('id'))
+            ->get();
+
+        $evaluated = $assignedEvaluations->whereNotNull('CompletionDate');
+        $notEvaluated = $assignedEvaluations->whereNull('CompletionDate');
+
+        return view('assigned_evaluations.group_evaluation_details', compact('evaluation', 'group', 'evaluated', 'notEvaluated'));
+    }
+
     public function show(AssignedEvaluation $assignedEvaluation)
     {
         return view('assigned_evaluations.show', compact('assignedEvaluation'));
     }
 
-    // Función para mostrar un resumen de todas las evaluaciones asignadas
-    public function overview()
+    public function edit(AssignedEvaluation $assignedEvaluation)
     {
-        $evaluations = Evaluation::with(['assignedEvaluations.collaborator'])->get();
-        return view('assigned_evaluations.overview', compact('evaluations'));
+        $questions = Question::where('EvaluationID', $assignedEvaluation->EvaluationID)->get();
+        return view('assigned_evaluations.edit', compact('assignedEvaluation', 'questions'));
     }
 
-    // Función para eliminar una evaluación asignada
+    public function update(Request $request, AssignedEvaluation $assignedEvaluation)
+    {
+        $questions = Question::where('EvaluationID', $assignedEvaluation->EvaluationID)->get();
+
+        foreach ($questions as $question) {
+            $assignedEvaluation->collaboratorAnswers()->updateOrCreate(
+                ['QuestionID' => $question->QuestionID],
+                ['AnswerID' => $request->input('answer_'.$question->QuestionID)]
+            );
+        }
+
+        $assignedEvaluation->update([
+            'CompletionDate' => now(),
+            'Score' => $this->calculateScore($assignedEvaluation),
+        ]);
+
+        $group = TeamGroup::whereHas('collaborators', function ($query) use ($assignedEvaluation) {
+            $query->where('id', $assignedEvaluation->CollaboratorID);
+        })->first();
+
+        return redirect()->route('assigned_evaluations.group.details', [
+            'evaluationID' => $assignedEvaluation->EvaluationID,
+            'groupID' => $group->GroupID,
+        ])->with('success', 'Evaluación actualizada correctamente.');
+    }
+
+    private function calculateScore(AssignedEvaluation $assignedEvaluation)
+    {
+        $questions = $assignedEvaluation->evaluation->questions;
+        $totalQuestions = $questions->count();
+        $correctAnswers = 0;
+
+        foreach ($questions as $question) {
+            $correctAnswer = $question->answers()->where('IsCorrect', true)->first();
+            if ($assignedEvaluation->collaboratorAnswers()->where('QuestionID', $question->QuestionID)->where('AnswerID', $correctAnswer->AnswerID)->exists()) {
+                $correctAnswers++;
+            }
+        }
+
+        return ($correctAnswers / $totalQuestions) * 100;
+    }
+
     public function destroy(AssignedEvaluation $assignedEvaluation)
     {
         $assignedEvaluation->delete();
